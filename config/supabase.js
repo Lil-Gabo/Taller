@@ -1,13 +1,8 @@
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY; // ← Usar service key
+const supabaseKey = process.env.SUPABASE_ANON_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseServiceKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-});
+const supabase = createClient(supabaseUrl, supabaseKey);
 
 module.exports = supabase;

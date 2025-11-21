@@ -6,7 +6,7 @@ const {
   obtenerTrabajosPorMecanico,
   obtenerMisTrabajos 
 } = require('../controllers/trabajosController');
-const { protegerRuta, soloAdmin } = require('../middlewares/auth');
+const { protegerRuta, soloAdmin } = require('../middleware/auth');
 
 router.use(protegerRuta);
 

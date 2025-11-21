@@ -8,7 +8,7 @@ const {
   reenviarConfirmacion,
   verificarEmail
 } = require('../controllers/authController');
-const { protegerRuta } = require('../middlewares/auth');
+const { protegerRuta } = require('../middleware/auth');
 
 router.post('/register', registrar);
 router.post('/login', login);

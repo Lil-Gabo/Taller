@@ -5,7 +5,7 @@ const {
   crearMecanico, 
   obtenerMecanicoPorId 
 } = require('../controllers/mecanicosController');
-const { protegerRuta, soloAdmin } = require('../middlewares/auth');
+const { protegerRuta, soloAdmin } = require('../middleware/auth');
 
 router.use(protegerRuta);
 router.use(soloAdmin);
