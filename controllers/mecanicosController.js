@@ -1,4 +1,12 @@
-const supabase = require('../config/supabase');
+const { supabaseAdmin } = require('../config/supabase');
+
+exports.crearMecanico = async (req, res) => {
+    // Usar supabaseAdmin solo para crear usuario
+    const { data: authData, error: authError } = await supabaseAdmin.auth.admin.createUser({
+        // ...
+    });
+    
+};
 
 // Obtener todos los mecánicos
 exports.obtenerMecanicos = async (req, res) => {
