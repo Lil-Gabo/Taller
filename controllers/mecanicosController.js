@@ -36,12 +36,28 @@ exports.crearMecanico = async (req, res) => {
   try {
     const { nombre, email, password } = req.body;
 
-    // 1. Crear usuario en Supabase Auth
-    const { data: authData, error: authError } = await supabase.auth.signUp({
+    // Verificar si el email ya existe
+    const { data: usuarioExiste } = await supabase
+      .from('usuarios')
+      .select('email')
+      .eq('email', email)
+      .single();
+
+    if (usuarioExiste) {
+      return res.status(400).json({ 
+        success: false, 
+        mensaje: 'El email ya está registrado' 
+      });
+    }
+
+    // 1. Crear usuario en Supabase Auth usando Admin API
+    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
       email,
       password,
-      options: {
-        data: { nombre, rol: 'mecanico' }
+      email_confirm: true, // Confirmar email automáticamente
+      user_metadata: { 
+        nombre, 
+        rol: 'mecanico' 
       }
     });
 
@@ -67,16 +83,19 @@ exports.crearMecanico = async (req, res) => {
       .single();
 
     if (errorMecanico) {
+      // Si falla, eliminar el usuario de Auth
+      await supabase.auth.admin.deleteUser(authData.user.id);
+      
       return res.status(500).json({ 
         success: false, 
-        mensaje: 'Error al crear mecánico',
+        mensaje: 'Error al crear perfil de mecánico',
         error: errorMecanico.message 
       });
     }
 
     res.status(201).json({
       success: true,
-      mensaje: 'Mecánico creado exitosamente',
+      mensaje: 'Mecánico creado exitosamente. Credenciales: ' + email,
       data: mecanico
     });
   } catch (error) {
