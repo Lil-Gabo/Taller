@@ -36,6 +36,8 @@ exports.crearMecanico = async (req, res) => {
   try {
     const { nombre, email, password } = req.body;
 
+    console.log('📝 Intentando crear mecánico:', { nombre, email });
+
     // Verificar si el email ya existe en la tabla usuarios
     const { data: usuarioExiste, error: errorCheck } = await supabase
       .from('usuarios')
@@ -50,31 +52,67 @@ exports.crearMecanico = async (req, res) => {
       });
     }
 
-    console.log('Creando usuario en Supabase Auth...');
+    console.log('✅ Email disponible, creando usuario en Auth...');
     
-    // 1. Crear usuario en Supabase Auth usando Admin API
-    const { data: authData, error: authError } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      email_confirm: true, // Confirmar email automáticamente
-      user_metadata: { 
-        nombre, 
-        rol: 'mecanico' 
-      }
-    });
+    // Intentar método 1: admin.createUser
+    let authData, authError;
+    
+    try {
+      const result = await supabase.auth.admin.createUser({
+        email,
+        password,
+        email_confirm: true,
+        user_metadata: { 
+          nombre, 
+          rol: 'mecanico' 
+        }
+      });
+      
+      authData = result.data;
+      authError = result.error;
+      
+    } catch (adminError) {
+      console.log('⚠️ admin.createUser falló, intentando método alternativo...');
+      console.error('Error:', adminError);
+      
+      // Método alternativo: usar signUp directo
+      const signUpResult = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: { 
+            nombre, 
+            rol: 'mecanico' 
+          },
+          emailRedirectTo: undefined
+        }
+      });
+      
+      authData = signUpResult.data;
+      authError = signUpResult.error;
+    }
 
     if (authError) {
-      console.error('Error en Supabase Auth:', authError);
+      console.error('❌ Error en Auth:', authError);
       return res.status(400).json({ 
         success: false, 
-        mensaje: authError.message 
+        mensaje: authError.message || 'Error al crear usuario en Supabase Auth',
+        detalle: authError
       });
     }
 
-    console.log('Usuario Auth creado:', authData.user.id);
-    console.log('Creando perfil en tabla usuarios...');
+    if (!authData || !authData.user) {
+      return res.status(400).json({ 
+        success: false, 
+        mensaje: 'No se pudo crear el usuario. authData.user es null',
+        detalle: 'Verifica que Sign-ups esté habilitado en Supabase'
+      });
+    }
 
-    // 2. Crear perfil en tabla usuarios
+    console.log('✅ Usuario Auth creado con ID:', authData.user.id);
+    console.log('📝 Creando perfil en tabla usuarios...');
+
+    // Crear perfil en tabla usuarios
     const { data: mecanico, error: errorMecanico } = await supabase
       .from('usuarios')
       .insert([
@@ -89,36 +127,39 @@ exports.crearMecanico = async (req, res) => {
       .single();
 
     if (errorMecanico) {
-      console.error('Error al crear perfil:', errorMecanico);
+      console.error('❌ Error al crear perfil:', errorMecanico);
       
-      // Si falla, intentar eliminar el usuario de Auth
+      // Intentar eliminar el usuario de Auth si falla el perfil
       try {
         await supabase.auth.admin.deleteUser(authData.user.id);
-        console.log('Usuario Auth eliminado por error en perfil');
+        console.log('🗑️ Usuario Auth eliminado por error en perfil');
       } catch (deleteError) {
-        console.error('Error al eliminar usuario Auth:', deleteError);
+        console.error('⚠️ No se pudo eliminar usuario Auth:', deleteError);
       }
       
       return res.status(500).json({ 
         success: false, 
-        mensaje: 'Error al crear perfil de mecánico',
-        error: errorMecanico.message 
+        mensaje: 'Error al crear perfil de mecánico en la tabla usuarios',
+        error: errorMecanico.message,
+        detalle: errorMecanico
       });
     }
 
-    console.log('Mecánico creado exitosamente:', mecanico);
+    console.log('✅ Mecánico creado exitosamente!');
 
     res.status(201).json({
       success: true,
-      mensaje: `Mecánico creado exitosamente. Email: ${email} | Password: ${password}`,
+      mensaje: `✅ Mecánico creado. Credenciales: ${email} / ${password}`,
       data: mecanico
     });
+    
   } catch (error) {
-    console.error('Error general:', error);
+    console.error('❌ Error general:', error);
     res.status(500).json({ 
       success: false, 
       mensaje: 'Error al crear mecánico', 
-      error: error.message 
+      error: error.message,
+      stack: process.env.NODE_ENV === 'development' ? error.stack : undefined
     });
   }
 };
