@@ -1,8 +1,23 @@
+// config/supabase.js
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
-const supabaseKey = process.env.SUPABASE_ANON_KEY;
+const supabaseAnonKey = process.env.SUPABASE_ANON_KEY;
+const supabaseServiceKey = process.env.SUPABASE_SERVICE_KEY;
 
-const supabase = createClient(supabaseUrl, supabaseKey);
+// Cliente normal (para operaciones públicas)
+const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
-module.exports = supabase;
+// Cliente admin (para operaciones de administrador)
+const supabaseAdmin = createClient(
+    supabaseUrl, 
+    supabaseServiceKey,
+    {
+        auth: {
+            autoRefreshToken: false,
+            persistSession: false
+        }
+    }
+);
+
+module.exports = { supabase, supabaseAdmin };
