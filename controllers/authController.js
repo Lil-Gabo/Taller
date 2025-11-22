@@ -13,8 +13,7 @@ exports.registrar = async (req, res) => {
         data: {
           nombre,
           rol: rol || 'mecanico'
-        },
-        emailRedirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/confirm`
+        }
       }
     });
 
@@ -22,13 +21,6 @@ exports.registrar = async (req, res) => {
       return res.status(400).json({ 
         success: false, 
         mensaje: authError.message 
-      });
-    }
-
-    if (!authData.user) {
-      return res.status(400).json({ 
-        success: false, 
-        mensaje: 'No se pudo crear el usuario en Supabase Auth' 
       });
     }
 
@@ -54,105 +46,18 @@ exports.registrar = async (req, res) => {
       });
     }
 
-    // Verificar si el email requiere confirmación
-    const requiresConfirmation = !authData.session;
-
     res.status(201).json({
       success: true,
-      mensaje: requiresConfirmation 
-        ? 'Usuario registrado. Por favor verifica tu email para activar la cuenta.' 
-        : 'Usuario registrado exitosamente',
+      mensaje: 'Usuario registrado exitosamente',
       data: {
         usuario,
-        session: authData.session,
-        requiresEmailConfirmation: requiresConfirmation
+        session: authData.session
       }
     });
   } catch (error) {
     res.status(500).json({ 
       success: false, 
       mensaje: 'Error al registrar usuario', 
-      error: error.message 
-    });
-  }
-};
-
-// NUEVO: Reenviar email de confirmación
-exports.reenviarConfirmacion = async (req, res) => {
-  try {
-    const { email } = req.body;
-
-    if (!email) {
-      return res.status(400).json({ 
-        success: false, 
-        mensaje: 'Email es requerido' 
-      });
-    }
-
-    const { data, error } = await supabase.auth.resend({
-      type: 'signup',
-      email: email,
-      options: {
-        emailRedirectTo: `${process.env.FRONTEND_URL || 'http://localhost:3000'}/auth/confirm`
-      }
-    });
-
-    if (error) {
-      return res.status(400).json({ 
-        success: false, 
-        mensaje: error.message 
-      });
-    }
-
-    res.json({
-      success: true,
-      mensaje: 'Email de confirmación reenviado'
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      mensaje: 'Error al reenviar email', 
-      error: error.message 
-    });
-  }
-};
-
-// NUEVO: Verificar token de email
-exports.verificarEmail = async (req, res) => {
-  try {
-    const { token_hash, type } = req.query;
-
-    if (!token_hash || type !== 'email') {
-      return res.status(400).json({ 
-        success: false, 
-        mensaje: 'Token inválido' 
-      });
-    }
-
-    const { data, error } = await supabase.auth.verifyOtp({
-      token_hash,
-      type: 'email'
-    });
-
-    if (error) {
-      return res.status(400).json({ 
-        success: false, 
-        mensaje: 'Error al verificar email',
-        error: error.message 
-      });
-    }
-
-    res.json({
-      success: true,
-      mensaje: 'Email verificado exitosamente',
-      data: {
-        session: data.session
-      }
-    });
-  } catch (error) {
-    res.status(500).json({ 
-      success: false, 
-      mensaje: 'Error al verificar email', 
       error: error.message 
     });
   }

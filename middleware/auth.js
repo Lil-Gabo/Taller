@@ -48,6 +48,7 @@ exports.protegerRuta = async (req, res, next) => {
   }
 };
 
+
 // Verificar que sea administrador
 exports.soloAdmin = (req, res, next) => {
   if (req.usuario.rol !== 'admin') {

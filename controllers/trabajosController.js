@@ -1,4 +1,4 @@
-const { supabase } = require('../config/supabase');
+const supabase = require('../config/supabase');
 
 // Crear nuevo trabajo
 exports.crearTrabajo = async (req, res) => {

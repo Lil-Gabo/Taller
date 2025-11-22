@@ -14,4 +14,5 @@ router.get('/', obtenerMecanicos);
 router.post('/', crearMecanico);
 router.get('/:id', obtenerMecanicoPorId);
 
+
 module.exports = router;

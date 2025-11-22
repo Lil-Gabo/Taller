@@ -15,4 +15,5 @@ router.get('/', soloAdmin, obtenerTodosTrabajos);
 router.get('/mecanico/:mecanicoId', soloAdmin, obtenerTrabajosPorMecanico);
 router.get('/mis-trabajos', obtenerMisTrabajos);
 
+
 module.exports = router;
