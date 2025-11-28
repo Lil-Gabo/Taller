@@ -1,2 +1,14 @@
-node_modules
-package-lock.json
+const gitignore = `
+node_modules/
+.env
+.DS_Store
+*.log
+npm-debug.log*
+dist/
+coverage/
+`;
+
+console.log('Estructura del proyecto backend creada');
+console.log('\n📦 package.json:', JSON.stringify(packageJson, null, 2));
+console.log('\n🔐 .env.example:', envExample);
+console.log('\n🚫 .gitignore:', gitignore);
