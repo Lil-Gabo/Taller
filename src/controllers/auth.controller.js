@@ -9,6 +9,8 @@ class AuthController {
     try {
       const { username, password } = req.body;
 
+      console.log('🔍 Login attempt:', { username, password: '***' });
+
       // Buscar admin en la base de datos
       const { data: admin, error } = await supabase
         .from('admins')
@@ -16,20 +18,30 @@ class AuthController {
         .eq('username', username)
         .single();
 
+      console.log('📊 Query result:', { 
+        found: !!admin, 
+        error: error?.message,
+        hasHash: !!admin?.password_hash 
+      });
+
       if (error || !admin) {
+        console.log('❌ Admin not found');
         return res.status(401).json({
           success: false,
-          message: 'Credenciales inválidas'
+          message: 'Credenciales inválidas - Usuario no encontrado'
         });
       }
 
       // Verificar contraseña
+      console.log('🔐 Comparing password...');
       const isValidPassword = await comparePassword(password, admin.password_hash);
+      console.log('🔐 Password valid?', isValidPassword);
 
       if (!isValidPassword) {
+        console.log('❌ Invalid password');
         return res.status(401).json({
           success: false,
-          message: 'Credenciales inválidas'
+          message: 'Credenciales inválidas - Contraseña incorrecta'
         });
       }
 
