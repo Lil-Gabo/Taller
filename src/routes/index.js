@@ -1,5 +1,6 @@
 const express = require('express');
 const router = express.Router();
+
 const authRoutes = require('./auth.routes');
 const mechanicRoutes = require('./mechanics.routes');
 const jobRoutes = require('./jobs.routes');

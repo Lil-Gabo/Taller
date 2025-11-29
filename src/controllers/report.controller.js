@@ -1,31 +1,34 @@
+// =============================================
+// src/controllers/report.controller.js
+// =============================================
 const { supabase } = require('../config/database');
 
+// Función helper fuera de la clase
+function getWeekDates(dateString = null) {
+  const date = dateString ? new Date(dateString) : new Date();
+  const day = date.getDay();
+  const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Lunes como inicio
+  
+  const weekStart = new Date(date.setDate(diff));
+  weekStart.setHours(0, 0, 0, 0);
+  
+  const weekEnd = new Date(weekStart);
+  weekEnd.setDate(weekStart.getDate() + 6);
+  weekEnd.setHours(23, 59, 59, 999);
+
+  return {
+    start: weekStart.toISOString().split('T')[0],
+    end: weekEnd.toISOString().split('T')[0]
+  };
+}
+
 class ReportController {
-
-  // Obtener el inicio y fin de la semana actual
-  getWeekDates(dateString = null) {
-    const date = dateString ? new Date(dateString) : new Date();
-    const day = date.getDay();
-    const diff = date.getDate() - day + (day === 0 ? -6 : 1); // Lunes como inicio
-    
-    const weekStart = new Date(date.setDate(diff));
-    weekStart.setHours(0, 0, 0, 0);
-    
-    const weekEnd = new Date(weekStart);
-    weekEnd.setDate(weekStart.getDate() + 6);
-    weekEnd.setHours(23, 59, 59, 999);
-
-    return {
-      start: weekStart.toISOString().split('T')[0],
-      end: weekEnd.toISOString().split('T')[0]
-    };
-  }
 
   // Obtener reporte semanal general (todos los mecánicos)
   async getWeeklySummary(req, res) {
     try {
       const { date } = req.query;
-      const { start, end } = this.getWeekDates(date);
+      const { start, end } = getWeekDates(date);
 
       // Obtener todos los trabajos de la semana
       const { data: jobs, error } = await supabase
@@ -116,7 +119,7 @@ class ReportController {
     try {
       const { mechanicId } = req.params;
       const { date } = req.query;
-      const { start, end } = this.getWeekDates(date);
+      const { start, end } = getWeekDates(date);
 
       // Verificar que el mecánico existe
       const { data: mechanic, error: mechanicError } = await supabase
@@ -195,7 +198,7 @@ class ReportController {
     try {
       const { mechanicId } = req.params;
       const { date, notes } = req.body;
-      const { start, end } = this.getWeekDates(date);
+      const { start, end } = getWeekDates(date);
 
       // Verificar que el mecánico existe
       const { data: mechanic, error: mechanicError } = await supabase

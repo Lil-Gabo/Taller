@@ -72,10 +72,15 @@ const uuidValidation = [
   param('id').isUUID().withMessage('ID inválido')
 ];
 
+const mechanicIdValidation = [
+  param('mechanicId').isUUID().withMessage('ID del mecánico inválido')
+];
+
 module.exports = {
   validateRequest,
   loginValidation,
   createMechanicValidation,
   createJobValidation,
-  uuidValidation
+  uuidValidation,
+  mechanicIdValidation
 };
