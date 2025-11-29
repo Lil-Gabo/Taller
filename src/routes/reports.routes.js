@@ -9,10 +9,10 @@ const { uuidValidation, validateRequest } = require('../utils/validators.util');
 router.use(authMiddleware);
 
 // Rutas solo para admin
-router.get('/weekly', isAdmin, reportController.getWeeklySummary);
+
+router.get('/weekly', reportController.getWeeklySummary.bind(reportController));
 router.post('/weekly/close/:mechanicId', isAdmin, uuidValidation, validateRequest, reportController.closeWeek);
 router.patch('/payments/:paymentId/mark-paid', isAdmin, reportController.markAsPaid);
-
 // Rutas accesibles por admin o el propio mecánico
 router.get('/weekly/mechanic/:mechanicId', isSelfOrAdmin, uuidValidation, validateRequest, reportController.getMechanicWeeklySummary);
 router.get('/payments/mechanic/:mechanicId', isSelfOrAdmin, uuidValidation, validateRequest, reportController.getPaymentHistory);
