@@ -3,15 +3,15 @@ const router = express.Router();
 const reportController = require('../controllers/report.controller');
 const authMiddleware = require('../middlewares/auth.middleware');
 const { isAdmin, isSelfOrAdmin } = require('../middlewares/role.middleware');
-const { uuidValidation, mechanicIdValidation, validateRequest } = require('../utils/validators.util');
+const { uuidValidation, mechanicIdValidation, paymentIdValidation, validateRequest } = require('../utils/validators.util');
 
 // Todas las rutas requieren autenticación
 router.use(authMiddleware);
 
 // Rutas solo para admin
 router.get('/weekly', isAdmin, reportController.getWeeklySummary);
-router.post('/weekly/close/:mechanicId', isAdmin, uuidValidation, validateRequest, reportController.closeWeek);
-router.patch('/payments/:paymentId/mark-paid', isAdmin, reportController.markAsPaid);
+router.post('/weekly/close/:mechanicId', isAdmin, mechanicIdValidation, validateRequest, reportController.closeWeek);
+router.patch('/payments/:paymentId/mark-paid', isAdmin, paymentIdValidation, validateRequest, reportController.markAsPaid);
 
 // Rutas accesibles por admin o el propio mecánico
 router.get('/weekly/mechanic/:mechanicId', isSelfOrAdmin, mechanicIdValidation, validateRequest, reportController.getMechanicWeeklySummary);

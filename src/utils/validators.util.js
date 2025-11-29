@@ -76,11 +76,16 @@ const mechanicIdValidation = [
   param('mechanicId').isUUID().withMessage('ID del mecánico inválido')
 ];
 
+const paymentIdValidation = [
+  param('paymentId').isUUID().withMessage('ID de pago inválido')
+];
+
 module.exports = {
   validateRequest,
   loginValidation,
   createMechanicValidation,
   createJobValidation,
   uuidValidation,
-  mechanicIdValidation
+  mechanicIdValidation,
+  paymentIdValidation
 };
